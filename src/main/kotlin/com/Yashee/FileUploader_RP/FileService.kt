@@ -17,24 +17,17 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.naming.SizeLimitExceededException
-
 @Service
 class FileService {
-
     val basePath = Paths.get("./src/main/resources/Uploads/")
-
     fun single(filePartMono: FilePart, size: Long): Mono<ResponseEntity<String>> {
         return Mono.just(filePartMono).flatMap { fp: FilePart ->
             when {
                 (size <= 172L) -> Mono.error(FileNotSelectedException())
-
                 (size > DataSize.ofKilobytes(5000)
                     .toBytes()) -> Mono.error(SizeLimitExceededException())
-
                 fp.filename().substring(fp.filename().lastIndexOf('.') +1) !in setOf("jpeg","pdf","jpg","doc","txt","png") -> Mono.error(
-                    UnsupportedMediaTypeException("File format not supported")
-                )
-
+                    UnsupportedMediaTypeException("File format not supported"))
                 else -> {
                     println("Received File : " + fp.filename())
                     return@flatMap fp.transferTo(basePath.resolve(fp.filename())).then(
@@ -43,9 +36,6 @@ class FileService {
             }
         }
     }
-    
-
-
     fun download( filename: String): Mono<ResponseEntity<Resource>> {
         val filePath: Path = basePath.toAbsolutePath().normalize().resolve(filename)
         return Mono.fromCallable {
@@ -62,7 +52,4 @@ class FileService {
             }
         }
     }
-
 }
-
-

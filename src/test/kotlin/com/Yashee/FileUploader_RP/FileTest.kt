@@ -1,34 +1,23 @@
 package com.Yashee.FileUploader_RP
 
 import com.Yashee.FileUploader_RP.Exception.FileNotSelectedException
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.context.WebApplicationContext
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.springframework.http.HttpStatus
+import org.springframework.core.io.Resource
 import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.multipart.FilePart
 import org.springframework.util.unit.DataSize
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException
-import org.springframework.web.server.ResponseStatusException
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 import reactor.test.StepVerifier
 import java.io.FileNotFoundException
 import java.nio.file.Path
+import java.nio.file.Paths
 import javax.naming.SizeLimitExceededException
 
 
@@ -37,7 +26,6 @@ class FileTest {
 
     @InjectMocks
     private lateinit var service: FileService
-
     @Test
     fun uploadTest(){
         val fp:FilePart= mock(FilePart::class.java)
@@ -84,7 +72,25 @@ class FileTest {
 
     @Test
     fun downloadTest(){
+        val fp:FilePart= mock(FilePart::class.java)
+        Mockito.`when`(fp.filename()).thenReturn("Dog.jpg")
 
+        var response:Mono<ResponseEntity<Resource>> = service.download(fp.filename())
+
+        StepVerifier.create(response)
+            .expectNextMatches{ob -> ob.statusCode.is2xxSuccessful}
+            .verifyComplete()
+    }
+
+    @Test
+    fun downloadTestError(){
+        val fp:FilePart= mock(FilePart::class.java)
+        Mockito.`when`(fp.filename()).thenReturn("Dogs.jpg")
+
+        var response:Mono<ResponseEntity<Resource>> = service.download(fp.filename())
+
+        StepVerifier.create(response)
+            .verifyError(FileNotFoundException::class.java)
     }
 
 
