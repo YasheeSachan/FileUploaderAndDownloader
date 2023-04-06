@@ -1,58 +1,52 @@
-package com.Yashee.FileUploader_RP.Exception
+package com.Yashee.FileUploader_RP.ExceptionClasses
 
-import com.Yashee.FileUploader_RP.FileNotSelectedException
+import com.Yashee.FileUploader_RP.Dto.Response
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.reactive.function.UnsupportedMediaTypeException
-import java.io.FileNotFoundException
 import javax.naming.SizeLimitExceededException
 
 @ControllerAdvice
-class ExceptionController {
+class ExceptionHandler {
 
-//    @ExceptionHandler(Exception::class)
-//    fun notFound1(): ResponseEntity<Response> {
-//        return ResponseEntity.badRequest().body(Response("File Not Found",404))
-//    }
-    //File was not called during download
-    @ExceptionHandler(FileNotFoundException::class)
-    fun notFound(): ResponseEntity<Response> {
-        return ResponseEntity.badRequest().body(Response("File Not Found",404))
-    }
 
     //No file was sent for uploading
     @ExceptionHandler(FileNotSelectedException::class)
-    fun notSelected():ResponseEntity<Response>{
-        return ResponseEntity.badRequest().body(Response("File Not Selected",416))
+    fun fileNotSelected(ex:Exception):ResponseEntity<Response>{
+        return ResponseEntity.badRequest().body(Response(ex.message))
     }
 
     @ExceptionHandler(InvalidUserIdException::class)
-    fun invalidUserId():ResponseEntity<Response>{
-        return ResponseEntity.badRequest().body(Response("Invalid User Id ",404))
+    fun invalidUserId(ex: Exception):ResponseEntity<Response>{
+        return ResponseEntity.badRequest().body(Response(ex.message))
     }
 
-    @ExceptionHandler(InvalidUserIdOrFileNameException::class)
-    fun invalidUserIdOrFile():ResponseEntity<Response>{
-        return ResponseEntity.badRequest().body(Response("File not found-Invalid UserId or filename ",404))
+    @ExceptionHandler(InvalidFileNameException::class)
+    fun invalidFileName(ex: Exception):ResponseEntity<Response>{
+        return ResponseEntity.badRequest().body(Response(ex.message))
     }
 
 
     //File size exceeded
     @ExceptionHandler(SizeLimitExceededException::class)
-    fun largeFile(): ResponseEntity<Response> {
-        return ResponseEntity.badRequest().body(Response("File size too large",413))
+    fun largeFile(ex: Exception): ResponseEntity<Response> {
+        return ResponseEntity.badRequest().body(Response(ex.message))
     }
 
     //File does not belong to allowed media type
     @ExceptionHandler(UnsupportedMediaTypeException::class)
-    fun format(): ResponseEntity<Response> {
-        return ResponseEntity.badRequest().body(Response("File format not supported",415))
+    fun format(ex: Exception): ResponseEntity<Response> {
+        return ResponseEntity.badRequest().body(Response(ex.message))
     }
 
-    @ExceptionHandler(IndexOutOfBoundsException::class)
-    fun numberOfFiles(): ResponseEntity<Response> {
-        return ResponseEntity.badRequest().body(Response("Only single file allowed", 406))
+    @ExceptionHandler(MultipleFileSelectedException::class)
+    fun numberOfFiles(ex:Exception): ResponseEntity<Response> {
+        return ResponseEntity.badRequest().body(Response(ex.message))
     }
-    data class Response(var message:String?, var errorCode: Int)
+    @ExceptionHandler(Exception::class)
+    fun parentHandler(): ResponseEntity<Response> {
+        return ResponseEntity.badRequest().body(Response("File Not Found"))
+    }
+
 }
